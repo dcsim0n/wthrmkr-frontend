@@ -3,59 +3,58 @@ import { Line } from 'react-chartjs-2';
 
 import './App.css';
 
+const api_url = "http://localhost:3000/data";
+
 
 
 class App extends Component {
 
   state = {
-    labels: [],
-    data: require('./data.json')
+    data: []
   }
 
-  _queryTemps(){
-    console.log("parsing temps")
-    return this.state.data.map( r =>{
-      return r.temp;
-    })
+  _queryTemp(){
+    return this.state.data.map( row => row.temperature )
   }
-  _queryHumid(){
-    return this.state.data.map( r =>{
-      return r.humi;
-    })
+  _queryHumidity(){
+    return this.state.data.map( row => row.humidity )
+  }
+  _queryTime(){
+    return this.state.data.map( row => row.time )
   }
   data = ( )=> {
     return {
-      labels: this.state.labels ,
+      labels:  this._queryTime(),
       datasets: [
         {
           label: 'Temperature',
-          data: this._queryTemps()
+          data: this._queryTemp()
         },
         { 
           label: 'Humidity',
-          data: this._queryHumid()
+          data: this._queryHumidity()
         }
       ]
     }
   }
-   
-  _newSample = ( ) => {
-    const newLabels = this.state.labels.slice()
-    newLabels.push( new Date().toJSON() )
-    const temp = this.state.temp.slice()
-    const humidity = this.state.humidity.slice()
-    temp.push(  Math.random() )
-    humidity.push( Math.random() )
-    console.log('newLabels', newLabels)
-    console.log('temp', temp)
-    console.log('humidity', humidity)
 
-    this.setState({
-      labels: newLabels,
-      temp: temp,
-      humidity: humidity
-    })
-  }
+  // _newSample = ( ) => {
+  //   const newLabels = this.state.labels.slice()
+  //   newLabels.push( new Date().toJSON() )
+  //   const temp = this.state.temp.slice()
+  //   const humidity = this.state.humidity.slice()
+  //   temp.push(  Math.random() )
+  //   humidity.push( Math.random() )
+  //   console.log('newLabels', newLabels)
+  //   console.log('temp', temp)
+  //   console.log('humidity', humidity)
+
+  //   this.setState({
+  //     labels: newLabels,
+  //     temp: temp,
+  //     humidity: humidity
+  //   })
+  // }
   render() {
     console.log("loaded data", this.state.data.length)
     return (
@@ -64,6 +63,20 @@ class App extends Component {
             
       </div>
     )
+  }
+
+  componentDidMount(){
+    fetch(api_url)
+    .then( resp => {
+      if (resp.error) {
+        throw resp.error
+      }
+
+      return resp.json();
+    })
+    .then( data => {
+      this.setState({ data });
+    })
   }
 }
 
